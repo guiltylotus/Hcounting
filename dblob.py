@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 
-img = cv2.imread('video/bs_1.PNG')
+img = cv2.imread('video/f1.PNG')
 img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 ret, img = cv2.threshold(img,127,255,cv2.THRESH_BINARY)
 

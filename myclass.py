@@ -18,7 +18,7 @@ class myClass():
         return frame
 
     #extract contours
-    def exContours(self,img):
+    def exContours(self, img, orImg):
         #input : frame 
         
         img, contours, hierarchy = cv2.findContours(img,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
@@ -39,6 +39,8 @@ class myClass():
                 
                 #rectangle
                 x,y,w,h = cv2.boundingRect(cnt)
-                cv2.rectangle(img,(x,y),(x+w,y+h),(128,255,0),2)
+                cv2.rectangle(orImg,(x,y),(x+w,y+h),(128,255,0),2, lineType=cv2.LINE_AA)
+
+        return orImg
         #output: frame + bb
 
