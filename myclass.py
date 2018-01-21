@@ -19,7 +19,7 @@ class myClass():
 
     #extract contours
     def exContours(self, img, orImg):
-        #input : frame 
+        """input : frame""" 
         
         img, contours, hierarchy = cv2.findContours(img,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
 
@@ -39,8 +39,26 @@ class myClass():
                 
                 #rectangle
                 x,y,w,h = cv2.boundingRect(cnt)
-                cv2.rectangle(orImg,(x,y),(x+w,y+h),(128,255,0),2, lineType=cv2.LINE_AA)
+                if (w*h > 500):
+                    cv2.rectangle(orImg,(x,y),(x+w,y+h),(128,255,0),2, lineType=cv2.LINE_AA)
 
         return orImg
-        #output: frame + bb
+        """output: frame + bb"""
 
+    def click_line(self, event, x, y, flags, param):
+        #cant use
+        line = []
+        check_click = False
+
+        if event == cv2.EVENT_LBUTTONDOWN:
+            check_click = True
+            line.append((x,y))
+
+        elif event == cv2.EVENT_LBUTTONUP:
+            check_click = False
+            line.append((x,y))
+
+        return(line)
+
+
+        

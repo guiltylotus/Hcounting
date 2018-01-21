@@ -4,8 +4,8 @@ from myclass import *
 
 _sam = myClass()
 cap = cv2.VideoCapture('video/video4-4.mp4')
-fgbg = cv2.createBackgroundSubtractorMOG2(history = 10, detectShadows=True)
-# h = fgbg.getHistory()
+fgbg = cv2.createBackgroundSubtractorMOG2(history = 100, detectShadows=True, varThreshold=127)
+# h = fgbg.getVarThreshold()
 # print(h)
 
 count = 0

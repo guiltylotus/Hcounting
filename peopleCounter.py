@@ -4,37 +4,71 @@ import sys
 import time
 
 def diffImg(t0, t1, t2):
-  d1 = cv2.absdiff(t2, t1) #residual frame
-  d2 = cv2.absdiff(t1, t0)
-  cv2.imshow('d1', d1)
-  cv2.imshow('d2', d2)
-  cv2.waitKey(0)
-#   print(d1)
-  return cv2.bitwise_and(d1, d2)
+    d1 = cv2.absdiff(t2, t1) #residual frame
+    d2 = cv2.absdiff(t1, t0)
+    return cv2.bitwise_and(d1, d2)
 
-cap = cv2.VideoCapture('video/video4-4.mp4')
+
+def click_line(event, x, y, flags, param):
+    
+    global line
+    check_click = False
+
+    if event == cv2.EVENT_LBUTTONDOWN:
+        check_click = True
+        line.append((x,y))
+
+    elif event == cv2.EVENT_LBUTTONUP:
+        check_click = False
+        line.append((x,y))
+
+#read
+cap = cv2.VideoCapture('video/y1.MP4')
 
 fgbg = cv2.bgsegm.createBackgroundSubtractorMOG()  #mixture of gaussian BS
 
-# region = (521, 78, 1123, 632)
+
 ret, frame = cap.read()
-# if not ret:
-#     print "Cannot capture frame!"
-#     sys.exit()
-# kernel = np.ones((5, 5), np.uint8)
-t_minus = cv2.cvtColor(cap.read()[1], cv2.COLOR_RGB2GRAY)
-t = cv2.cvtColor(cap.read()[1], cv2.COLOR_RGB2GRAY)
-t_plus = cv2.cvtColor(cap.read()[1], cv2.COLOR_RGB2GRAY)
+
+#init
+first_frame = cap.read()[1]
+t_minus = cv2.cvtColor(first_frame, cv2.COLOR_RGB2GRAY)
+t = cv2.cvtColor(first_frame, cv2.COLOR_RGB2GRAY)
+t_plus = cv2.cvtColor(first_frame, cv2.COLOR_RGB2GRAY)
+line = []
+fcount = 0
+clone = first_frame.copy()
+
+
+#mouse capture
+cv2.namedWindow('frame')
+cv2.setMouseCallback('frame', click_line)
+
+#setup a visual gate
+while(True): 
+    cv2.imshow("frame", first_frame)
+    
+    time.sleep(0.05)
+    k = cv2.waitKey(1) & 0xFF
+
+    if k == ord('q'):
+        break
+    elif k == ord('r'):
+        line = []
+        first_frame = clone.copy()
+    elif k == ord('p'):
+        print(line)
+        cv2.line(first_frame,line[0],line[1],(0,0,255),5)
+
+
 while ret:
     ret, frame = cap.read()
+    fcount += 1
+
     if ret:
         # frame = frame[region[1]:region[1]+ region[3], region[0]:region[0]+region[2]]
         fgmask = diffImg(t_minus, t, t_plus)
-        cv2.imshow('fgmask', fgmask)
-        cv2.imshow('t', t) 
-        cv2.imshow('t_plus', t_plus)
-        # fgmask = cv2.absdiff(firstFrame, cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY))
-        # Read next image
+        
         t_minus = t
         t = t_plus
         t_plus = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
@@ -47,28 +81,26 @@ while ret:
         
         for contour in contours:
             x, y, w, h = cv2.boundingRect(contour)
-            if w*h > 30000:
+            if w*h > 50:
                 cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 1, lineType=cv2.LINE_AA)
-        # print frame.shape
 
-        # cv2.imshow("frame", frame)
-        # cv2.imshow("mask", thresh)
+
+        cv2.line(frame,line[0],line[1],(0,0,255),5)
+        cv2.imshow("frame", frame)
+        cv2.imshow("mask", thresh)
         
-        # time.sleep(0.05)
-        # k = cv2.waitKey(1)
-        # if k & 0xFF == ord('q'):
-        #     cv2.waitKey(0)
-        #     # box  = cv2.selectROI('area', frame)
-        #     # print box
-        # elif k == 27:
-        #     break
-        #     # break
-        
-        cv2.waitKey(0)
+        time.sleep(0.05)
+        k = cv2.waitKey(1)
+        if k & 0xFF == ord('q'):
+            cv2.waitKey(0)
+
+        elif k == 27:
+            break
+     
+        # cv2.waitKey(0)
             
             
 cap.release()
-# out.release()
 cv2.destroyAllWindows()
 
 
