@@ -23,7 +23,7 @@ def click_line(event, x, y, flags, param):
         line.append((x,y))
 
 #read
-cap = cv2.VideoCapture('video/y1.MP4')
+cap = cv2.VideoCapture('video/TownCentreXVID.avi')
 
 fgbg = cv2.bgsegm.createBackgroundSubtractorMOG()  #mixture of gaussian BS
 
@@ -38,6 +38,7 @@ t_plus = cv2.cvtColor(first_frame, cv2.COLOR_RGB2GRAY)
 line = []
 fcount = 0
 clone = first_frame.copy()
+kernel = np.ones((3,3), np.uint8)
 
 
 #mouse capture
@@ -76,12 +77,13 @@ while ret:
         thresh = cv2.adaptiveThreshold(fgmask, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 111, 2)
         # ret2, thresh = cv2.threshold(fgmask, 75, 255, cv2.THRESH_BINARY)
         thresh = cv2.bitwise_not(thresh)
-        thresh = cv2.dilate(thresh, None, iterations=2)
+        thresh = cv2.dilate(thresh, kernel, iterations=2)
+        # thresh = cv2.erode(thresh, kernel, iterations = 1)
         im2, contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         
         for contour in contours:
             x, y, w, h = cv2.boundingRect(contour)
-            if w*h > 50:
+            if w*h > 500:
                 cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 1, lineType=cv2.LINE_AA)
 
 
