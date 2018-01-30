@@ -19,8 +19,8 @@ class myClass():
 
     #centroid
     def calCentroid(self, x, y, w, h):
-        cx = int(x+(x+w)/2)
-        cy = int(y+(y+w)/2)
+        cx = int(x+ w/2)
+        cy = int(y+ h/2)
 
         return(cx,cy)
 

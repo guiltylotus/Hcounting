@@ -20,12 +20,12 @@ def click_line(event, x, y, flags, param):
         check_click = True
         line.append((x,y))
 
-    elif event == cv2.EVENT_LBUTTONUP:
-        check_click = False
-        line.append((x,y))
+    # elif event == cv2.EVENT_LBUTTONUP:
+    #     check_click = False
+    #     line.append((x,y))
 
 #read
-cap = cv2.VideoCapture('video/y1.mp4')
+cap = cv2.VideoCapture('video/y2.mp4')
 
 fgbg = cv2.bgsegm.createBackgroundSubtractorMOG()  #mixture of gaussian BS
 
@@ -46,7 +46,12 @@ kernel = np.ones((3,3), np.uint8)
 kernel11 = np.ones((11,11), np.uint8)
 areaTH = 2000
 _method = myClass()
+direct = 1
+p_in = 0
+p_out = 0
 
+height, width, chennel = np.shape(np.array(frame))
+max_p_age = 5
 
 #mouse capture
 cv2.namedWindow('frame')
@@ -66,7 +71,11 @@ while(True):
         first_frame = clone.copy()
     elif k == ord('p'):
         print(line)
-        cv2.line(first_frame,line[0],line[1],(0,0,255),5)
+        mid_y = int((line[0][1] + line[1][1])/2)
+
+        cv2.line(first_frame,(0,line[0][1]),(width, line[0][1]),(216, 39, 217),1)
+        cv2.line(first_frame,(0,line[1][1]),(width, line[1][1]),(216, 39, 217),1)
+        cv2.line(first_frame,(0,mid_y),(width, mid_y),(0,0,255),1)
 
 
 #main
@@ -96,40 +105,40 @@ while ret:
             area = cv2.contourArea(contour)
             x, y, w, h = cv2.boundingRect(contour)
             cv2.drawContours(frame, contour, -1, (0,255,0), 3, 8)
-            print("area ", area)
+            # print("area ", area)
             if area > areaTH:
                 # M = cv2.moments(contour)
                 # cx = int(M['m10']/M['m00'])
                 # cy = int(M['m01']/M['m00'])
                 cx,cy = _method.calCentroid(x,y,w,h)
                 
-                cv2.circle(frame, (cx,cy), 5, (0,0,255), -1)
+                # cv2.circle(frame, (cx,cy), 5, (0,0,255), -1)
                 cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 1, lineType=cv2.LINE_AA)
                 
                 """ check new person"""
                 new = True
 
                 for p in person_list:
-                    px, py = p.getCentroid()
-                    if (abs(x - px) <= w and abs(y - py) <= h):
-                        new = False
-                        break
+                        px, py = p.getCentroid()
+                        if (abs(x - px) <= w and abs(y - py) <= h):
+                            new = False
+                            break
                 
                 if new:
                     id += 1
                     print("id ", id)
                     p = myperson.Person(id, x, y, w, h, cx, cy)
                     person_list.append(p)
-                    print("person pos new", p.getPos())
+                    # print("person pos new", p.getPos())
 
         """ Track person in list by Meanshift"""
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)   #convert to hsv
-        mask = cv2.inRange(frame, np.array((0., 60., 32.)), np.array((180., 255., 255.))) 
+        mask = cv2.inRange(hsv, np.array((0., 60., 32.)), np.array((180., 255., 255.))) 
 
         print(len(person_list))
         for p in person_list:
             x, y, w, h = p.getPos()
-            print("person pos old", p.getPos())
+            # print("person pos old", p.getPos())
             track_window = (x,y,w,h)
             hsv_roi = hsv[y:y+h, x:x+w]
             mask_roi = mask[y:y+h, x:x+w]
@@ -145,17 +154,34 @@ while ret:
 
             _x, _y, _w, _h = track_window
             p.updatePos(_x, _y, _w, _h)
+            cx, cy = _method.calCentroid(_x,_y,_w,_h)
+            p.updateCentroid(cx,cy)
 
+            if (p.getAlive() and not p.checkAlive(mid_y)):
+                if (p.getStt()):
+                    p_in += 1
+                else:
+                    p_out += 1
+
+            # print("new track_window", track_window)
 
             # cv2.rectangle(frame, (x, y), (x + w, y + h), (255,0, 0), 1, lineType=cv2.LINE_AA)
-            # cv2.rectangle(frame, (_x, _y), (_x + _w, _y + _h), (0, 0, 255), 1, lineType=cv2.LINE_AA)
 
+            # if (p.getAlive()):
+            cv2.rectangle(frame, (_x, _y), (_x + _w, _y + _h), (0, 0, 255), 1, lineType=cv2.LINE_AA)
+            cv2.circle(frame, (cx,cy), 5, (0,0,255), -1)
         
 
 
-        # cv2.circle(frame, (cx,cy), 5, (0,0,255), -1)
+        cv2.line(frame,(0,line[0][1]),(width, line[0][1]),(216, 39, 217),1)
+        cv2.line(frame,(0,line[1][1]),(width, line[1][1]),(216, 39, 217),1)
+        cv2.line(frame,(0,mid_y),(width, mid_y),(0,0,255),1)
 
-        cv2.line(frame,line[0],line[1],(0,0,255),5)
+        cv2.putText(frame, "In: {}".format(str(p_in)), (10, 10),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+        cv2.putText(frame, "Out: {}".format(str(p_out)), (10, height-10),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+
         cv2.imshow("frame", frame)
         cv2.imshow("mask", thresh)
         
