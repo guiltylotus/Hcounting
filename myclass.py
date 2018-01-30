@@ -17,6 +17,13 @@ class myClass():
                 
         return frame
 
+    #centroid
+    def calCentroid(self, x, y, w, h):
+        cx = int(x+(x+w)/2)
+        cy = int(y+(y+w)/2)
+
+        return(cx,cy)
+
     #extract contours
     def exContours(self, img, orImg):
         """input : frame""" 
