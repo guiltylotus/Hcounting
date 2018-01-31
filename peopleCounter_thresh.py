@@ -105,7 +105,7 @@ while ret:
         for contour in contours:
             area = cv2.contourArea(contour)
             x, y, w, h = cv2.boundingRect(contour)
-            cv2.drawContours(frame, contour, -1, (0,255,0), 3, 8)
+            # cv2.drawContours(frame, contour, -1, (0,255,0), 3, 8)
             cx,cy = _method.calCentroid(x,y,w,h)
 
             print("area ", area)
@@ -123,13 +123,8 @@ while ret:
 
                 for p in person_list:
                     if (p.getAlive()):
-                        # print("line1 ", line[0][1])
-                        # print("line2 ", line[1][1])
                         px, py = p.getCentroid()
-                        # print("centroids ", py)
                         if (abs(x - px) <= w and abs(y - py) <= h):
-                            # print("this old person ", x, " ", y )
-                            # print("this old person1 ", px, " ", py )
                             new = False
                             break
                 
@@ -141,8 +136,7 @@ while ret:
                     # print("person pos new", p.getPos())
 
         """ Track person in list by Meanshift"""
-        hsv = cv2.cvtColor(true_frame, cv2.COLOR_BGR2HSV)   #convert to hsv
-        mask = cv2.inRange(hsv, np.array((0., 60., 32.)), np.array((180., 255., 255.))) 
+        hsv = thresh  #convert to hsv
 
         print(len(person_list))
         for p in person_list:
@@ -150,19 +144,17 @@ while ret:
                 
                 if not p.checkAlive(line[0][1], line[1][1]):
                     break
-                # print("centroid of P", p.getCentroid())
                 x, y, w, h = p.getPos()
-                # print("person pos old", p.getPos())
                 track_window = (x,y,w,h)
                 hsv_roi = hsv[y:y+h, x:x+w]
-                mask_roi = mask[y:y+h, x:x+w]
+               
 
-                hist = cv2.calcHist([hsv_roi], [0], mask_roi, [16], [0, 180] ) #histogram of hsv_roi
+                hist = cv2.calcHist([hsv_roi], [0], None, [16], [0, 180] ) #histogram of hsv_roi
                 cv2.normalize(hist,hist,0,255, cv2.NORM_MINMAX)
                 hist = hist.reshape(-1)
 
                 prob = cv2.calcBackProject([hsv], [0], hist, [0, 180], 1)
-                prob &= mask
+                prob = np.bitwise_not(np.array(prob))
                 term_crit = ( cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 10, 1 )
                 track_box, track_window = cv2.CamShift(prob, track_window, term_crit)
 
@@ -183,9 +175,9 @@ while ret:
                 # cv2.rectangle(frame, (x, y), (x + w, y + h), (255,0, 0), 1, lineType=cv2.LINE_AA)
 
                 # if (p.checkInrange(line[0][1], line[1][1])):
-                cv2.rectangle(frame, (_x, _y), (_x + _w, _y + _h), (0, 0, 255), 1, lineType=cv2.LINE_AA)
+                # cv2.rectangle(frame, (_x, _y), (_x + _w, _y + _h), (0, 0, 255), 1, lineType=cv2.LINE_AA)
                 cv2.circle(frame, (cx,cy), 5, (0,0,255), -1)
-                cv2.imshow("backproject", prob)
+                # cv2.imshow("backproject", prob)
             
 
 
@@ -202,14 +194,14 @@ while ret:
         cv2.imshow("mask", thresh)
         
         time.sleep(0.05)
-        # k = cv2.waitKey(1)
-        # if k & 0xFF == ord('q'):
-        #     cv2.waitKey(0)
+        k = cv2.waitKey(1)
+        if k & 0xFF == ord('q'):
+            cv2.waitKey(0)
 
-        # elif k == 27:
-        #     break
+        elif k == 27:
+            break
      
-        cv2.waitKey(0)
+        # cv2.waitKey(0)
             
             
 cap.release()
