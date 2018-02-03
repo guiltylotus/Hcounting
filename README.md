@@ -19,6 +19,17 @@ HAC clustering
 # Tracking
 
 https://www.pyimagesearch.com/2015/09/21/opencv-track-object-movement/
+
 https://stackoverflow.com/questions/23604505/detect-the-main-direction-of-a-component-using-opencv
+
 https://www.learnopencv.com/object-tracking-using-opencv-cpp-python/
+
 https://www.youtube.com/watch?v=aEcBnD80nLg
+
+# Hog 
+
+http://juliaimages.github.io/ImageFeatures.jl/latest/tutorials/object_detection.html
+
+http://mccormickml.com/2013/05/09/hog-person-detector-tutorial/
+
+https://www.learnopencv.com/histogram-of-oriented-gradients/
