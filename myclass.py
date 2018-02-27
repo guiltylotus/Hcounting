@@ -24,6 +24,16 @@ class myClass():
 
         return(cx,cy)
 
+    #check if point in tracking zone
+    def checkInrange(self, cx, cy, _x, _y):
+        check = False
+        
+        if (_x <= cy and cy <= _y):
+            check = True
+        
+        return check
+
+
     #extract contours
     def exContours(self, img, orImg):
         """input : frame""" 
